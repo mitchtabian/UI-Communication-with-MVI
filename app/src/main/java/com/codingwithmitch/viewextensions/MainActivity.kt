@@ -1,9 +1,8 @@
 package com.codingwithmitch.viewextensions
 
 import android.os.Bundle
-import android.widget.Toast
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.android.synthetic.main.main_activity.*
 
 class MainActivity : AppCompatActivity() {
@@ -15,22 +14,35 @@ class MainActivity : AppCompatActivity() {
         setupDemo()
     }
 
+    fun Button.setToastMessageListener(message: String?){
+        this.setOnClickListener {
+            message?.let {
+                displayToast(message)
+            }
+        }
+    }
+
+    fun Button.setDialogMessageListener(message: String, isError: Boolean){
+        this.setOnClickListener {
+            if(isError) displayErrorDialog(message)
+            else displaySuccessDialog(message)
+        }
+    }
+
     private fun setupDemo(){
-        success_toast.setOnClickListener {
-            displayToast("You successfully did that thing!")
-        }
+        success_toast.setToastMessageListener("You successfully did that thing!")
 
-        error_toast.setOnClickListener {
-            displayToast("Something went wrong...")
-        }
+        error_toast.setToastMessageListener("Something went wrong...")
 
-        success_dialog.setOnClickListener {
-            displaySuccessDialog("You successfully did that thing!")
-        }
+        success_dialog.setDialogMessageListener(
+            "You successfully did that thing!",
+            false
+        )
 
-        error_dialog.setOnClickListener {
-            displayErrorDialog("Something went wrong...")
-        }
+        error_dialog.setDialogMessageListener(
+            "Something went wrong...",
+            true
+        )
 
         are_you_sure.setOnClickListener {
             val areYouSureCallback = object: AreYouSureCallback{
@@ -39,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun cancel() {
-                    displayToast("Cancelled.")
+                    displayToast("Cancelled...")
                 }
             }
             areYouSureDialog(
@@ -47,50 +59,6 @@ class MainActivity : AppCompatActivity() {
                 areYouSureCallback
             )
         }
-    }
-
-
-    fun displayToast(message:String?){
-        Toast.makeText(this,message, Toast.LENGTH_SHORT).show()
-    }
-
-    fun displaySuccessDialog(message: String){
-        MaterialDialog(this)
-            .show{
-                title(R.string.text_success)
-                message(text = message)
-                positiveButton(R.string.text_ok)
-            }
-    }
-
-    fun displayErrorDialog(errorMessage: String){
-        MaterialDialog(this)
-            .show{
-                title(R.string.text_error)
-                message(text = errorMessage)
-                positiveButton(R.string.text_ok)
-            }
-    }
-
-    fun areYouSureDialog(message: String, callback: AreYouSureCallback){
-        MaterialDialog(this)
-            .show{
-                title(R.string.are_you_sure)
-                message(text = message)
-                negativeButton(R.string.text_cancel){
-                    callback.cancel()
-                }
-                positiveButton(R.string.text_yes){
-                    callback.proceed()
-                }
-            }
-    }
-
-    interface AreYouSureCallback {
-
-        fun proceed()
-
-        fun cancel()
     }
 
 }
