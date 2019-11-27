@@ -1,96 +1,89 @@
 package com.codingwithmitch.viewextensions
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
 import kotlinx.android.synthetic.main.main_activity.*
 
 class MainActivity : AppCompatActivity() {
+
+    private val TAG: String = "AppDebug"
+
+    lateinit var preferences: SharedPreferences
+    lateinit var editor: SharedPreferences.Editor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        setupDemo()
+        initPrefs()
+
+        filter_dialog.setOnClickListener {
+            showFilterDialog()
+        }
     }
 
-    private fun setupDemo(){
-        success_toast.setOnClickListener {
-            displayToast("You successfully did that thing!")
+    private fun initPrefs(){
+        preferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        editor = preferences.edit()
+    }
+
+    fun showFilterDialog(){
+
+        val dialog = MaterialDialog(this)
+            .noAutoDismiss()
+            .customView(R.layout.layout_filter)
+
+        // set initial preferences
+        val filter = preferences.getString(getString(R.string.key_filter), getString(R.string.filter_date))
+        if(filter.equals(getString(R.string.filter_date))){
+            dialog.findViewById<RadioGroup>(R.id.filter_group).check(R.id.filter_date)
+        }
+        else{
+            dialog.findViewById<RadioGroup>(R.id.filter_group).check(R.id.filter_author)
         }
 
-        error_toast.setOnClickListener {
-            displayToast("Something went wrong...")
+        val order = preferences.getString(getString(R.string.key_order), getString(R.string.order_asc))
+        if(order.equals(getString(R.string.order_asc))){
+            dialog.findViewById<RadioGroup>(R.id.order_group).check(R.id.order_asc)
+        }
+        else{
+            dialog.findViewById<RadioGroup>(R.id.order_group).check(R.id.order_desc)
         }
 
-        success_dialog.setOnClickListener {
-            displaySuccessDialog("You successfully did that thing!")
-        }
+        // get new preferences
+        dialog.findViewById<TextView>(R.id.positive_button).setOnClickListener{
+            Log.d(TAG, "FilterDialog: apply filter.")
 
-        error_dialog.setOnClickListener {
-            displayErrorDialog("Something went wrong...")
-        }
-
-        are_you_sure.setOnClickListener {
-            val areYouSureCallback = object: AreYouSureCallback{
-                override fun proceed() {
-                    displayToast("You successfully did that thing!")
-                }
-
-                override fun cancel() {
-                    displayToast("Cancelled.")
-                }
-            }
-            areYouSureDialog(
-                "Are you sure you want to do that? This can't be un-done.",
-                areYouSureCallback
+            val selectedFilter = dialog.getCustomView().findViewById<RadioButton>(
+                dialog.getCustomView().findViewById<RadioGroup>(R.id.filter_group).checkedRadioButtonId
             )
+            val selectedOrder= dialog.getCustomView().findViewById<RadioButton>(
+                dialog.getCustomView().findViewById<RadioGroup>(R.id.order_group).checkedRadioButtonId
+            )
+
+            editor.putString("filter", selectedFilter.text.toString())
+            editor.apply()
+            editor.putString("order", selectedOrder.text.toString())
+            editor.apply()
+
+            dialog.dismiss()
         }
-    }
 
+        dialog.findViewById<TextView>(R.id.negative_button).setOnClickListener {
+            Log.d(TAG, "FilterDialog: cancelling filter.")
+            dialog.dismiss()
+        }
 
-    fun displayToast(message:String?){
-        Toast.makeText(this,message, Toast.LENGTH_SHORT).show()
-    }
-
-    fun displaySuccessDialog(message: String){
-        MaterialDialog(this)
-            .show{
-                title(R.string.text_success)
-                message(text = message)
-                positiveButton(R.string.text_ok)
-            }
-    }
-
-    fun displayErrorDialog(errorMessage: String){
-        MaterialDialog(this)
-            .show{
-                title(R.string.text_error)
-                message(text = errorMessage)
-                positiveButton(R.string.text_ok)
-            }
-    }
-
-    fun areYouSureDialog(message: String, callback: AreYouSureCallback){
-        MaterialDialog(this)
-            .show{
-                title(R.string.are_you_sure)
-                message(text = message)
-                negativeButton(R.string.text_cancel){
-                    callback.cancel()
-                }
-                positiveButton(R.string.text_yes){
-                    callback.proceed()
-                }
-            }
-    }
-
-    interface AreYouSureCallback {
-
-        fun proceed()
-
-        fun cancel()
+        dialog.show()
     }
 
 }

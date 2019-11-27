@@ -7,4 +7,16 @@
     <string name="text_cancel">Cancel</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="text_yes">yes</string>
+    <string name="ascending_or_descending_order">Ascending or descending order</string>
+    <string name="text_filter_options">Filter Options</string>
+    <string name="filter_by_author_or_date">Filter by author or date</string>
+    <string name="text_author">Author</string>
+    <string name="text_date">Date</string>
+    <string name="text_filter">Filter</string>
+    <string name="filter_author">Author</string>
+    <string name="filter_date">Date</string>
+    <string name="key_filter">filter</string>
+    <string name="key_order">order</string>
+    <string name="order_asc">ASC</string>
+    <string name="order_desc">DESC</string>
 </resources>
